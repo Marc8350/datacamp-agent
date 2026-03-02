@@ -63,7 +63,7 @@ Be systematic and robust. If an element takes time to appear, do not panic, just
 
 async def main():
     llm = ChatOpenAI(
-        model="auto",
+        model="anthropic/sonnet", # explicitly use a top-tier vision model
         base_url="http://localhost:8402/v1",
         api_key="x402-proxy-handles-auth",
         temperature=0.2,
