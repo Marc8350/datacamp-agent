@@ -53,9 +53,10 @@ async def main():
 
     browser = Browser(
         browser_profile=BrowserProfile(
-            headless=True,  # Runs invisibly on the Pi
-            # Persists cookies/session across runs so login only happens once
-            user_data_dir='./browser_data'
+            # Run the browser natively in Browser-Use's cloud infrastructure!
+            # This allows you to log in to their dashboard and literally watch it run live.
+            use_cloud=True, 
+            # user_data_dir is ignored/unnecessary on the cloud since it manages sessions differently
         )
     )
 
