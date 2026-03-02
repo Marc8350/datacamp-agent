@@ -1,29 +1,8 @@
 import asyncio
 import os
 from dotenv import load_dotenv
-from browser_use import Agent, Browser, BrowserProfile
-from langchain_openai import ChatOpenAI as _ChatOpenAI
+from browser_use import Agent, Browser, BrowserProfile, ChatBrowserUse
 from pydantic import ConfigDict
-
-# browser-use compatibility shim for langchain_openai.ChatOpenAI:
-#   1. llm.provider — browser-use checks this for feature flags / telemetry
-#   2. llm.model — browser-use accesses this, but langchain stores it as model_name
-#   3. setattr(llm, 'ainvoke', ...) — browser-use monkey-patches for cost tracking,
-#      but Pydantic v2 blocks setting unknown attributes
-class ChatOpenAI(_ChatOpenAI):
-    model_config = ConfigDict(extra='allow')
-    provider: str = 'openai'
-
-    @property
-    def model(self) -> str:
-        """browser-use accesses llm.model, langchain stores it as model_name."""
-        return self.model_name
-
-    def __setattr__(self, name: str, value):
-        try:
-            super().__setattr__(name, value)
-        except (ValueError, AttributeError):
-            object.__setattr__(self, name, value)
 
 load_dotenv()
 
@@ -62,11 +41,14 @@ Be systematic and robust. If an element takes time to appear, do not panic, just
 """
 
 async def main():
-    llm = ChatOpenAI(
-        model="anthropic/sonnet", # explicitly use a top-tier vision model
-        base_url="http://localhost:8402/v1",
-        api_key="x402-proxy-handles-auth",
-        temperature=0.2,
+    api_key = os.getenv("BROWSER_USE_API_KEY", "")
+    if not api_key:
+        print("❌ Please set BROWSER_USE_API_KEY in your .env file!")
+        return
+
+    llm = ChatBrowserUse(
+        api_key=api_key,
+        model="bu-1-0", # browser-use's default cloud model
     )
 
     browser = Browser(
