@@ -83,6 +83,7 @@ async def main():
         browser=browser,
         sensitive_data=sensitive_data, # Replaces placeholders in DOM/actions
         max_actions_per_step=8, # Allows slightly more complex page interactions
+        generate_gif="datacamp_run.gif", # Extremely helpful for debugging what happened without screen!
     )
 
     print("🦞 OpenCLAW DataCamp Agent starting...")
@@ -92,7 +93,7 @@ async def main():
     result = await agent.run(max_steps=200)
     
     print("✅ Run Complete!")
-    await browser.close()
+    await browser.kill()
     
 if __name__ == "__main__":
     asyncio.run(main())
