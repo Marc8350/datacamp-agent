@@ -1,7 +1,7 @@
 import asyncio
 import os
 from dotenv import load_dotenv
-from browser_use import Agent, Browser, BrowserConfig
+from browser_use import Agent, Browser, BrowserProfile
 from langchain_openai import ChatOpenAI
 
 load_dotenv()
@@ -49,10 +49,10 @@ async def main():
     )
 
     browser = Browser(
-        config=BrowserConfig(
+        browser_profile=BrowserProfile(
             headless=True,  # Runs invisibly on the Pi
-            # This directory will store cookies so login doesn't have to happen every single time
-            user_data_dir='./browser_data' 
+            # Persists cookies/session across runs so login only happens once
+            user_data_dir='./browser_data'
         )
     )
 
