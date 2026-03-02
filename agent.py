@@ -5,19 +5,24 @@ from browser_use import Agent, Browser, BrowserProfile
 from langchain_openai import ChatOpenAI as _ChatOpenAI
 from pydantic import ConfigDict
 
-# Newer browser-use versions:
-#   1. Check llm.provider (not on langchain's ChatOpenAI) → add it as a field
-#   2. Monkey-patch llm.ainvoke for cost tracking → Pydantic v2 blocks this by default.
-#      We override __setattr__ to fall back to object.__setattr__ when Pydantic rejects it.
+# browser-use compatibility shim for langchain_openai.ChatOpenAI:
+#   1. llm.provider — browser-use checks this for feature flags / telemetry
+#   2. llm.model — browser-use accesses this, but langchain stores it as model_name
+#   3. setattr(llm, 'ainvoke', ...) — browser-use monkey-patches for cost tracking,
+#      but Pydantic v2 blocks setting unknown attributes
 class ChatOpenAI(_ChatOpenAI):
     model_config = ConfigDict(extra='allow')
     provider: str = 'openai'
+
+    @property
+    def model(self) -> str:
+        """browser-use accesses llm.model, langchain stores it as model_name."""
+        return self.model_name
 
     def __setattr__(self, name: str, value):
         try:
             super().__setattr__(name, value)
         except (ValueError, AttributeError):
-            # Allow browser-use to monkey-patch methods (e.g. ainvoke for cost tracking)
             object.__setattr__(self, name, value)
 
 load_dotenv()
