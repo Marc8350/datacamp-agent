@@ -2,7 +2,12 @@ import asyncio
 import os
 from dotenv import load_dotenv
 from browser_use import Agent, Browser, BrowserProfile
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI as _ChatOpenAI
+
+# Newer browser-use versions check llm.provider in multiple places.
+# langchain_openai.ChatOpenAI doesn't have this attribute, so we add it.
+class ChatOpenAI(_ChatOpenAI):
+    provider: str = 'openai'
 
 load_dotenv()
 
@@ -44,8 +49,8 @@ async def main():
     llm = ChatOpenAI(
         model="auto",
         base_url="http://localhost:8402/v1",
-        api_key="x402-proxy-handles-auth", # CLAW Router needs some dummy string
-        temperature=0.2, # Lower temperature for better code reasoning
+        api_key="x402-proxy-handles-auth",
+        temperature=0.2,
     )
 
     browser = Browser(
